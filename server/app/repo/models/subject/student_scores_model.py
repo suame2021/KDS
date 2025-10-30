@@ -1,4 +1,4 @@
-from ..dependecy import Base
+from ...dependecy import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import UUID, String, DateTime, ForeignKey, Float, Integer, Boolean
 import uuid

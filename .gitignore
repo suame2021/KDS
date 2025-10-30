@@ -1,0 +1,5 @@
+__pycache__/
+server/.env
+server/venv
+server/alembic
+server/alemic.ini
