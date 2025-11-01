@@ -6,6 +6,7 @@ import Login from "../../features/auth/view/pages/Login";
 import NavbarLayout from "../component/NavBarLayout";
 import ExamSelection from "../../features/dashboard/students/view/pages/ExamSelection";
 import ProtectedRoute from "../component/ProtectedRoutes";
+import ExamPreParation from "../../features/dashboard/students/view/pages/ExamPreparation";
 
 export default function MainRoute() {
     return <>
@@ -18,6 +19,8 @@ export default function MainRoute() {
                 <Route element={<ProtectedRoute />}>
                     <Route element={<NavbarLayout />}>
                         <Route path={AppUrl.examSelectionUrl} element={<ExamSelection />} />
+                         <Route path={AppUrl.examPreparation} element={<ExamPreParation />} />
+
                     </Route>
                 </Route>
             </Routes>

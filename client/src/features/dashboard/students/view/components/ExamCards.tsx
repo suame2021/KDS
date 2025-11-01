@@ -1,26 +1,30 @@
 import examIcon from "../../../../../assets/images/exams.svg"
+import type { SubjectModel } from "../../../../../common/model/classModels/subject_model"
+import { useSelectedExam } from "../../../../../utils/hooks/use_selected_exam"
 
 type examCardProps = {
-    title: string,
-    author: string,
-    subjectId: string, 
-    active: boolean, 
-
+    subject: SubjectModel
 }
 
 export default function ExamCard({
-    title, author, subjectId, active = true
-}:examCardProps) {
-    return <div className="exam-card" onClick={()=>{console.log(subjectId)}}>
+    subject
+}: examCardProps) {
+    const { setSelectedExam, getExamStats } = useSelectedExam()
+    return <div className="exam-card" onClick={async () => {
+        setSelectedExam(subject)
+        
+        await getExamStats()
+
+    }}>
         <div className="image-container">
             <img src={examIcon} alt="" />
         </div>
         <div className="description">
             <h3>
-                {title}
+                {subject.title}
             </h3>
             <small>
-                {author}
+                {subject.author}
             </small>
         </div>
     </div>

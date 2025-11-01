@@ -24,4 +24,9 @@ export class AllServerUrls{
     // all subject url
     static getAllSubjects:string = `${AllServerUrls.backendUrl}/subjects/get_all_subject`
 
+
+
+    // all time url
+    static getExamTime:string = `${AllServerUrls.backendUrl}/timer/get_exam_time`
+
 }

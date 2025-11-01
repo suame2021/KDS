@@ -23,7 +23,7 @@ export default function ExamSelection() {
                             <div className="exam-container">
                                 {
                                     subjects?.subjects.length === 0 ? <Spinner /> : subjects?.subjects.map(
-                                        (sub, key) => <ExamCard active={sub.enable} author={sub.author} subjectId={sub.id} title={sub.title} key={key} />
+                                        (sub, key) => <ExamCard subject={sub} key={key} />
                                     )
                                 }
                             </div>

@@ -7,4 +7,5 @@ class AuthEums(Enum):
     NOT_FOUND = "not_found"
     NOT_ALLOWED = "not_allowed"
     OK = "ok"
+    ERROR = "error"
     ALLOWRD = "allowed"
