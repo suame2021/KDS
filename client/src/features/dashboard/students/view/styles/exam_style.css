@@ -63,3 +63,16 @@
     color: #0d6efd; /* primary text */
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
+
+.exam-qa{
+    min-height: 400px !important;
+}
+
+.question-card.answered {
+  background-color: #0d6efd;
+  color: white;
+}
+.question-card.answered {
+  background-color: #0d6efd;
+  color: white;
+}

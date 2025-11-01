@@ -29,4 +29,9 @@ export class AllServerUrls{
     // all time url
     static getExamTime:string = `${AllServerUrls.backendUrl}/timer/get_exam_time`
 
+
+
+    // all question url
+    static getAllQuestion:string = `${AllServerUrls.backendUrl}/question/get_questions`
+
 }

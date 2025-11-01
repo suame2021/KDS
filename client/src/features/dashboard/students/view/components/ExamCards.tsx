@@ -9,10 +9,10 @@ type examCardProps = {
 export default function ExamCard({
     subject
 }: examCardProps) {
-    const { setSelectedExam, getExamStats } = useSelectedExam()
+    const { setSelectedExam, getExamStats, getAllAvaliableQuestions } = useSelectedExam()
     return <div className="exam-card" onClick={async () => {
         setSelectedExam(subject)
-        
+        await getAllAvaliableQuestions()
         await getExamStats()
 
     }}>

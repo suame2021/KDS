@@ -1,224 +1,152 @@
-import { useState } from "react";
-import "../styles/exam_style.css"
+import "../styles/exam_style.css";
 import TimerCard from "../components/TimerCard";
+import { useSelectedExam } from "../../../../../utils/hooks/use_selected_exam";
+import { useStudentAnswers } from "../../../../../utils/hooks/use_student_answers";
 
 export default function ExamScreen() {
-    const questions = [
-        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-                { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },        { id: 1, text: "What is 2 + 2?" },
-        { id: 2, text: "Define photosynthesis." },
-        { id: 3, text: "Who discovered gravity?" },
-        { id: 4, text: "Explain Newton’s second law." },
-        { id: 5, text: "What is the capital of France?" },
-        { id: 6, text: "Name a prime number between 10 and 20." },
-        // add more questions as needed
-    ];
+  const {
+    allAvaliableQuestions: questions,
+    currentQuestionIndex,
+    nextQuestion,
+    prevQuestion,
+    setCurrentQuestionIndex,
+  } = useSelectedExam();
 
-    const [currentQuestion, setCurrentQuestion] = useState(1);
+  const {setAnswer, getAnswer, checkAnswered } = useStudentAnswers();
 
-    const nextQuestion = () => {
-        setCurrentQuestion(prev => (prev < questions.length ? prev + 1 : prev));
-    };
+  if (!questions || questions.length === 0) {
+    return <div className="text-center mt-5">No questions available.</div>;
+  }
 
-    const prevQuestion = () => {
-        setCurrentQuestion(prev => (prev > 1 ? prev - 1 : prev));
-    };
+  const currentQuestion = questions[currentQuestionIndex];
+  const questionId = currentQuestion.id;
+  const selectedAnswer = getAnswer(questionId);
 
-    return (
-        <div className="container mt-4 exam-container">
-            {/* Timer Row */}
-            <div className="row">
-                <TimerCard/>
+  const handleSelect = (option: string) => {
+    setAnswer(questionId, option);
+  };
+
+  return (
+    <div className="container mt-4 exam-container">
+      {/* Timer */}
+      <div className="row">
+        <TimerCard />
+      </div>
+
+      {/* Main Content */}
+      <div className="row">
+        {/* Q&A Column */}
+        <div className="col-md-8">
+          <div className="exam-qa card shadow-sm p-4 w-100 mb-3">
+            <h5 className="mb-3 text-uppercase">
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </h5>
+            <p className="lead">{currentQuestion.question}</p>
+
+            <form className="mt-3">
+              {/* ✅ Option A */}
+              <div className="form-check">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name={`question-${questionId}`}
+                  id={`optionA-${questionId}`}
+                  checked={selectedAnswer === "A"}
+                  onChange={() => handleSelect("A")}
+                />
+                <label htmlFor={`optionA-${questionId}`} className="form-check-label">
+                  <strong>A.</strong> {currentQuestion.a}
+                </label>
+              </div>
+
+              {/* ✅ Option B */}
+              <div className="form-check">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name={`question-${questionId}`}
+                  id={`optionB-${questionId}`}
+                  checked={selectedAnswer === "B"}
+                  onChange={() => handleSelect("B")}
+                />
+                <label htmlFor={`optionB-${questionId}`} className="form-check-label">
+                  <strong>B.</strong> {currentQuestion.b}
+                </label>
+              </div>
+
+              {/* ✅ Option C */}
+              <div className="form-check">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name={`question-${questionId}`}
+                  id={`optionC-${questionId}`}
+                  checked={selectedAnswer === "C"}
+                  onChange={() => handleSelect("C")}
+                />
+                <label htmlFor={`optionC-${questionId}`} className="form-check-label">
+                  <strong>C.</strong> {currentQuestion.c}
+                </label>
+              </div>
+
+              {/* ✅ Option D */}
+              <div className="form-check">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name={`question-${questionId}`}
+                  id={`optionD-${questionId}`}
+                  checked={selectedAnswer === "D"}
+                  onChange={() => handleSelect("D")}
+                />
+                <label htmlFor={`optionD-${questionId}`} className="form-check-label">
+                  <strong>D.</strong> {currentQuestion.d}
+                </label>
+              </div>
+            </form>
+
+            {/* Navigation Buttons */}
+            <div className="d-flex justify-content-between mt-4">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={prevQuestion}
+                disabled={currentQuestionIndex === 0}
+              >
+                ← Previous
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={nextQuestion}
+                disabled={currentQuestionIndex === questions.length - 1}
+              >
+                Next →
+              </button>
             </div>
-
-            {/* Main Content Row */}
-            <div className="row">
-                {/* Q&A Column */}
-                <div className="col-md-8">
-                    <div className="exam-qa card shadow-sm p-4 w-100 mb-3">
-                        <h5 className="mb-3 text-uppercase">
-                            Question {currentQuestion} of {questions.length}
-                        </h5>
-                        <p className="lead">{questions[currentQuestion - 1].text}</p>
-
-                        <div className="mt-3">
-                            <div className="form-check">
-                                <input type="radio" className="form-check-input" name="q" id="a1" />
-                                <label htmlFor="a1" className="form-check-label">Option A</label>
-                            </div>
-                            <div className="form-check">
-                                <input type="radio" className="form-check-input" name="q" id="a2" />
-                                <label htmlFor="a2" className="form-check-label">Option B</label>
-                            </div>
-                            <div className="form-check">
-                                <input type="radio" className="form-check-input" name="q" id="a3" />
-                                <label htmlFor="a3" className="form-check-label">Option C</label>
-                            </div>
-                            <div className="form-check">
-                                <input type="radio" className="form-check-input" name="q" id="a4" />
-                                <label htmlFor="a4" className="form-check-label">Option D</label>
-                            </div>
-                        </div>
-
-                        {/* Navigation Buttons */}
-                        <div className="d-flex justify-content-between mt-4">
-                            <button
-                                className="btn btn-outline-secondary"
-                                onClick={prevQuestion}
-                                disabled={currentQuestion === 1}
-                            >
-                                ← Previous
-                            </button>
-                            <button
-                                className="btn btn-primary"
-                                onClick={nextQuestion}
-                                disabled={currentQuestion === questions.length}
-                            >
-                                Next →
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* All Questions Column */}
-                <div className="col-md-4">
-                    <div className="all-questions-container  gap-2">
-                        {questions.map((q, index) => (
-                            <div
-                                key={index}
-                                className={`question-card ${currentQuestion === q.id ? "active" : ""}`}
-                                onClick={() => setCurrentQuestion(q.id)}
-                            >
-                                Q{q.id}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    );
+
+        {/* All Questions */}
+        <div className="col-md-4">
+          <div className="all-questions-container gap-2">
+            {questions.map((q, index) => {
+              const isActive = currentQuestionIndex === index;
+              const isAnswered = checkAnswered(q.id);
+
+              return (
+                <div
+                  key={q.id}
+                  className={`question-card ${isActive ? "active" : ""} ${
+                    isAnswered ? "answered" : ""
+                  }`}
+                  onClick={() => setCurrentQuestionIndex(index)}
+                >
+                  Q{index + 1}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

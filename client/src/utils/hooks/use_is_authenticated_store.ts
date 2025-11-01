@@ -83,6 +83,7 @@ export const useIsAuthenticatedStore = create<UseIsAuthenticatedParams>((set, ge
 
   // 🔹 Clear everything
   logout: async () => {
+    set({ isAuthenticated: false });
     sessionStorage.removeItem(KEY);
 
     // Reset other stores
@@ -91,6 +92,6 @@ export const useIsAuthenticatedStore = create<UseIsAuthenticatedParams>((set, ge
     setToken(null as any);
     setUser(null as any);
 
-    set({ isAuthenticated: false });
+
   },
 }));

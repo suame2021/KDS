@@ -8,14 +8,21 @@ import { useNotificationStore } from "./use_notification_store";
 import { AllServerUrls } from "../http/all_server_url";
 import { AppUrl } from "../../common/routes/app_urls";
 import { useNavigationStore } from "./use_navigation_store";
+import type { QuestionModel } from "../../common/model/classModels/QuestionModel";
 
 type UseSelectedExam = {
+  allAvaliableQuestions: QuestionModel[] | null;
   selectedExam: SubjectModel | null;
   timer: TimerModel | null;
   isLoading: boolean;
   remainingTime: number;
   isTimerRunning: boolean;
+  currentQuestionIndex: number
+  setCurrentQuestionIndex: (index: number) => void
+  nextQuestion: () => void
+  prevQuestion: () => void
   setSelectedExam: (subject: SubjectModel) => void;
+  getAllAvaliableQuestions: () => Promise<void>
   getExamStats: () => Promise<void>;
   startTimer: (onTimeUp?: () => void) => void;
   stopTimer: () => void;
@@ -27,10 +34,22 @@ const TIMER_KEY = "remainingTime";
 const TIMER_OBJECT_KEY = "timerObject";
 const LAST_UPDATE_KEY = "lastUpdateTime";
 const RUNNING_KEY = "isTimerRunning";
+const ALLQUESTIONS = "allUqestions";
+const CURRENT_QUESTION_KEY = "currentQuestionIndex";
 
 let timerInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useSelectedExam = create<UseSelectedExam>((set, get) => ({
+  allAvaliableQuestions: (() => {
+    const store = sessionStorage.getItem(ALLQUESTIONS);
+    if (!store) return null;
+    try {
+      return JSON.parse(store)
+    } catch {
+      sessionStorage.removeItem(ALLQUESTIONS);
+      return null;
+    }
+  })(),
   selectedExam: (() => {
     const stored = sessionStorage.getItem(SESSION_KEY);
     if (!stored) return null;
@@ -65,7 +84,27 @@ export const useSelectedExam = create<UseSelectedExam>((set, get) => ({
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(subject));
     set({ selectedExam: subject });
   },
+  getAllAvaliableQuestions: async () => {
+    const { isAuthenticated } = useIsAuthenticatedStore.getState();
+    const { token } = useAuthTokenStore.getState();
+    const { selectedExam } = get();
+    if (get().allAvaliableQuestions !== null) return
+    if (!isAuthenticated) return console.warn("Student not authenticated!");
 
+    try {
+      set({ isLoading: true })
+      const newQuest = await requestQuestions({ token: token!, subjectId: selectedExam?.id! })
+      if (newQuest) {
+        sessionStorage.setItem(ALLQUESTIONS, JSON.stringify(newQuest))
+        set({ allAvaliableQuestions: newQuest })
+      }
+
+    } catch (e) {
+
+    } finally {
+      set({ isLoading: false })
+    }
+  },
   getExamStats: async () => {
     const { selectedExam } = get();
     const { isAuthenticated } = useIsAuthenticatedStore.getState();
@@ -138,6 +177,38 @@ export const useSelectedExam = create<UseSelectedExam>((set, get) => ({
     set({ isTimerRunning: false });
   },
 
+
+  // all question operation logic
+
+  currentQuestionIndex:
+    Number(sessionStorage.getItem(CURRENT_QUESTION_KEY)) || 0,
+
+  setCurrentQuestionIndex: (index: number) => {
+    const { allAvaliableQuestions } = get();
+    if (!allAvaliableQuestions) return;
+
+    const clampedIndex = Math.max(0, Math.min(index, allAvaliableQuestions.length - 1));
+    sessionStorage.setItem(CURRENT_QUESTION_KEY, clampedIndex.toString());
+    set({ currentQuestionIndex: clampedIndex });
+  },
+
+  nextQuestion: () => {
+    const { currentQuestionIndex, allAvaliableQuestions } = get();
+    if (!allAvaliableQuestions) return;
+
+    const nextIndex = Math.min(currentQuestionIndex + 1, allAvaliableQuestions.length - 1);
+    sessionStorage.setItem(CURRENT_QUESTION_KEY, nextIndex.toString());
+    set({ currentQuestionIndex: nextIndex });
+  },
+
+  prevQuestion: () => {
+    const { currentQuestionIndex } = get();
+    const prevIndex = Math.max(currentQuestionIndex - 1, 0);
+    sessionStorage.setItem(CURRENT_QUESTION_KEY, prevIndex.toString());
+    set({ currentQuestionIndex: prevIndex });
+  },
+
+
   clear: () => {
     if (timerInterval) clearInterval(timerInterval);
     sessionStorage.removeItem(SESSION_KEY);
@@ -181,4 +252,17 @@ async function requestTimer({
 
   navigate(AppUrl.examPreparation);
   return res.data;
+}
+
+
+async function requestQuestions({ token, subjectId }: { token: string, subjectId: string }) {
+  var res = await DefaultRequestSetUp.get<QuestionModel[]>({ url: `${AllServerUrls.getAllQuestion}?subject_id=${subjectId}`, token: token })
+
+  console.log(res)
+  if (res.statusCode === 500) {
+    useNotificationStore.getState().showNotification(res.message, "error")
+    return null
+  }
+
+  return res.data
 }

@@ -10,7 +10,7 @@ import { AllExamOperations } from "../../viewModel/allExamsOperation";
 
 export default function ExamPreParation() {
   const {
-    selectedExam, timer
+    selectedExam, timer, allAvaliableQuestions
   } = useSelectedExam()
   const { navigate } = useNavigationStore()
   const { subjects } = useAllSubjects()
@@ -29,6 +29,7 @@ export default function ExamPreParation() {
   ]
 
   )
+  console.log(allAvaliableQuestions)
   return (
     <div className="exam-container mt-4">
       {/* Header Section */}

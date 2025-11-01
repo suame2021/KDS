@@ -17,8 +17,7 @@ class QuestionModel(Base):
     # Foreign key to SubjectModel (one-to-one)
     subject_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("subjects.id", ondelete="CASCADE"),
-        unique=True,     
+        ForeignKey("subjects.id", ondelete="CASCADE"),    
         nullable=False
     )
 
