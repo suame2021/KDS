@@ -5,6 +5,7 @@ import MainRoute from "./common/routes/main_routes";
 import { useIsAuthenticatedStore } from "./utils/hooks/use_is_authenticated_store";
 import { useCurrentUserStore } from "./utils/hooks/use_current_user";
 import { useAuthTokenStore } from "./utils/hooks/use_auth_token_store";
+import PopupMenu from "./common/component/PopUpMenu";
 
 
 
@@ -33,6 +34,7 @@ function App() {
     <>
       <GlobalNotification />
       <MainRoute />
+      <PopupMenu />
     </>
   );
 }

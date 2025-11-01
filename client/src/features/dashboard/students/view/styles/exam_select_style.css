@@ -7,7 +7,7 @@
   display: flex;
   flex-wrap: wrap;
   overflow-x: auto;
-  height: 600px;
+  min-height: 600px;
   gap: 20px;
   justify-content: center;
   background-color: #fff;

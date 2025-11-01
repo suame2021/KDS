@@ -9,72 +9,70 @@ import { AllServerUrls } from "../http/all_server_url";
 import { AppUrl } from "../../common/routes/app_urls";
 import { useNavigationStore } from "./use_navigation_store";
 
-// 🔑 Session storage keys
-const SESSION_EXAM_KEY = "selectedExam";
-const SESSION_TIMER_KEY = "selectedExamTimer";
-
 type UseSelectedExam = {
   selectedExam: SubjectModel | null;
   timer: TimerModel | null;
   isLoading: boolean;
+  remainingTime: number;
+  isTimerRunning: boolean;
   setSelectedExam: (subject: SubjectModel) => void;
   getExamStats: () => Promise<void>;
+  startTimer: (onTimeUp?: () => void) => void;
+  stopTimer: () => void;
   clear: () => void;
 };
 
-// ✅ Helper to restore SubjectModel class instance
-function restoreSubjectModel(data: any): SubjectModel | null {
-  if (!data) return null;
-  return new SubjectModel(data.id, data.title, data.author, data.enable, data.classId);
-}
+const SESSION_KEY = "selectedExam";
+const TIMER_KEY = "remainingTime";
+const TIMER_OBJECT_KEY = "timerObject";
+const LAST_UPDATE_KEY = "lastUpdateTime";
+const RUNNING_KEY = "isTimerRunning";
+
+let timerInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useSelectedExam = create<UseSelectedExam>((set, get) => ({
-  // ✅ Restore from session storage on load
   selectedExam: (() => {
-    const stored = sessionStorage.getItem(SESSION_EXAM_KEY);
+    const stored = sessionStorage.getItem(SESSION_KEY);
     if (!stored) return null;
     try {
-      const parsed = JSON.parse(stored);
-      return restoreSubjectModel(parsed);
+      return JSON.parse(stored);
     } catch {
-      sessionStorage.removeItem(SESSION_EXAM_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
       return null;
     }
   })(),
 
   timer: (() => {
-    const stored = sessionStorage.getItem(SESSION_TIMER_KEY);
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored) as TimerModel;
-    } catch {
-      sessionStorage.removeItem(SESSION_TIMER_KEY);
-      return null;
-    }
+    const stored = sessionStorage.getItem(TIMER_OBJECT_KEY);
+    return stored ? JSON.parse(stored) : null;
   })(),
 
   isLoading: false,
 
+  remainingTime: (() => {
+    const storedTime = Number(sessionStorage.getItem(TIMER_KEY)) || 0;
+    const lastUpdate = Number(sessionStorage.getItem(LAST_UPDATE_KEY)) || 0;
+    if (storedTime && lastUpdate) {
+      const diff = Math.floor((Date.now() - lastUpdate) / 1000);
+      return Math.max(storedTime - diff, 0);
+    }
+    return storedTime;
+  })(),
+
+  isTimerRunning: sessionStorage.getItem(RUNNING_KEY) === "true",
 
   setSelectedExam: (subject) => {
-    sessionStorage.setItem(SESSION_EXAM_KEY, JSON.stringify(subject));
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(subject));
     set({ selectedExam: subject });
   },
-
 
   getExamStats: async () => {
     const { selectedExam } = get();
     const { isAuthenticated } = useIsAuthenticatedStore.getState();
     const { token } = useAuthTokenStore.getState();
 
-    if (!selectedExam) {
-      console.warn("No exam selected!");
-      return;
-    }
-    if (!isAuthenticated) {
-      console.warn("Student not authenticated!");
-      return;
-    }
+    if (!selectedExam) return console.warn("No exam selected!");
+    if (!isAuthenticated) return console.warn("Student not authenticated!");
 
     try {
       set({ isLoading: true });
@@ -85,10 +83,13 @@ export const useSelectedExam = create<UseSelectedExam>((set, get) => ({
       });
 
       if (newTimer) {
-        sessionStorage.setItem(SESSION_TIMER_KEY, JSON.stringify(newTimer));
-        set({ timer: newTimer });
-      } else {
-        console.warn("No timer found for this exam.");
+        sessionStorage.setItem(TIMER_OBJECT_KEY, JSON.stringify(newTimer));
+
+        const totalSeconds = newTimer.hr * 3600 + newTimer.mins * 60 + newTimer.sec;
+        sessionStorage.setItem(TIMER_KEY, totalSeconds.toString());
+        sessionStorage.setItem(LAST_UPDATE_KEY, Date.now().toString());
+
+        set({ timer: newTimer, remainingTime: totalSeconds });
       }
     } catch (error) {
       console.error("Failed to fetch exam timer:", error);
@@ -97,18 +98,63 @@ export const useSelectedExam = create<UseSelectedExam>((set, get) => ({
     }
   },
 
+  startTimer: (onTimeUp) => {
+    if (timerInterval) clearInterval(timerInterval);
+
+    // ✅ Mark timer as running (persistent)
+    sessionStorage.setItem(RUNNING_KEY, "true");
+    set({ isTimerRunning: true });
+
+    timerInterval = setInterval(() => {
+      const { remainingTime } = get();
+      if (remainingTime <= 1) {
+        clearInterval(timerInterval!);
+        timerInterval = null;
+
+        sessionStorage.removeItem(TIMER_KEY);
+        sessionStorage.removeItem(LAST_UPDATE_KEY);
+        sessionStorage.removeItem(RUNNING_KEY);
+
+        set({ remainingTime: 0, isTimerRunning: false });
+
+        if (onTimeUp) onTimeUp();
+        return;
+      }
+
+      const newTime = remainingTime - 1;
+      sessionStorage.setItem(TIMER_KEY, newTime.toString());
+      sessionStorage.setItem(LAST_UPDATE_KEY, Date.now().toString());
+      set({ remainingTime: newTime });
+    }, 1000);
+  },
+
+  stopTimer: () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    sessionStorage.removeItem(RUNNING_KEY);
+    set({ isTimerRunning: false });
+  },
 
   clear: () => {
-    sessionStorage.removeItem(SESSION_EXAM_KEY);
-    sessionStorage.removeItem(SESSION_TIMER_KEY);
+    if (timerInterval) clearInterval(timerInterval);
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(TIMER_KEY);
+    sessionStorage.removeItem(LAST_UPDATE_KEY);
+    sessionStorage.removeItem(TIMER_OBJECT_KEY);
+    sessionStorage.removeItem(RUNNING_KEY);
+
     set({
       selectedExam: null,
       timer: null,
       isLoading: false,
+      remainingTime: 0,
+      isTimerRunning: false,
     });
   },
 }));
-
 
 async function requestTimer({
   token,
