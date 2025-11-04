@@ -4,6 +4,8 @@ import ClassCardTile from "./ClassCardTile";
 import { Plus } from "lucide-react";
 import { useClassCreationStore } from "../../../../../utils/hooks/use_class_creation_store";
 import { AllAdminOperation } from "../../viewModel/allAdminOperations";
+import { useNavigationStore } from "../../../../../utils/hooks/use_navigation_store";
+import { AppUrl } from "../../../../../common/routes/app_urls";
 
 interface AllAvailableClassProps {
   allClass: ClassModel[];
@@ -23,6 +25,7 @@ export default function AllAvailableClass({
 }: AllAvailableClassProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { setProgress } = useClassCreationStore()
+  const { navigate } = useNavigationStore()
 
   // Filter classes based on the search term
   const filteredClasses = allClass.filter(
@@ -82,14 +85,14 @@ export default function AllAvailableClass({
                   key={key}
                   className={class_.className}
                   teacherName={class_.teacherName}
-                  onView={() => { }}
+                  onView={() => navigate(`/admin/${AppUrl.build(AppUrl.viewParticularClass, { className: class_.className })}`)}
                   onDelete={() =>
                     openPopup({
                       title: "Confirm Action",
                       message:
                         "Do you want to continue with this delete operation?",
-                      onContinue:async () =>  { 
-                        await AllAdminOperation.deleteThisClass({className: class_.className})
+                      onContinue: async () => {
+                        await AllAdminOperation.deleteThisClass({ className: class_.className })
                       },
                       onCancel: () => closePopup(),
                     })

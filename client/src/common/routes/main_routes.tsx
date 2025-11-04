@@ -9,6 +9,9 @@ import ProtectedRoute from "../component/ProtectedRoutes";
 import ExamPreParation from "../../features/dashboard/students/view/pages/ExamPreparation";
 import ExamScreen from "../../features/dashboard/students/view/pages/ExamScreen";
 import AdminDashBoard from "../../features/dashboard/admin/view/pages/AdminDashBoard";
+import ViewParticularClass from "../../features/dashboard/admin/view/pages/ViewParticularClass";
+import ViewParticularClassSubjects from "../../features/dashboard/admin/view/pages/ViewParticularClassSubjects";
+import AddNewSubject from "../../features/dashboard/admin/view/pages/AddNewClass";
 
 export default function MainRoute() {
     return <>
@@ -27,6 +30,9 @@ export default function MainRoute() {
 
                         <Route path={AppUrl.adminPath}>
                         <Route index element={<AdminDashBoard/>}/>
+                        <Route path={AppUrl.viewParticularClass} element={<ViewParticularClass/>}/>
+                        <Route path={AppUrl.viewParticularClassSubject} element={<ViewParticularClassSubjects/>}/>
+                        <Route path={AppUrl.addNewSubject} element={<AddNewSubject/>}/>
                         </Route>
 
                     </Route>

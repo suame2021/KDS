@@ -8,7 +8,7 @@ class SubJectModel(Base):
     __tablename__ = "subjects"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title: Mapped[str] = mapped_column(String(100), index=True, unique=True)
+    title: Mapped[str] = mapped_column(String(100), index=True)
     author: Mapped[str] = mapped_column(String(100), index=True)
     enable: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

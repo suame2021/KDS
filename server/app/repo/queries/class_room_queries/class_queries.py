@@ -1,8 +1,12 @@
+from typing import Optional
 from app.repo.schemas.class_schemas.add_new_class_schemas import AddNewClassSchemas
 from app.utils.enums.class_room_enums import ClassRoomEnums
-from app.repo.schemas.class_schemas.class_schemas import ClassSchemas
+from app.repo.schemas.class_schemas.class_schemas import ClassFullDetails, ClassSchemas
+from app.repo.schemas.student_schemas.add_new_student_schemas import StudentInfoSchemas
+from app.repo.schemas.subject_schemas.add_new_subject import AddNewSubjectSchemas, ParticularSubjectSchemas
 from ...dependecy import AsyncSession
 from sqlalchemy import UUID, select
+from sqlalchemy.orm import selectinload
 from ...models import ClassModel
 from uuid import uuid4
 
@@ -63,4 +67,50 @@ class ClassQueries:
         await self.session.delete(chcck)
         await self.session.commit()
         return ClassRoomEnums.OK
-        
+    
+    
+    
+    async def get_class_full_info(self, class_name: str) -> Optional[ClassFullDetails]:
+            stmt = (
+                select(ClassModel)
+                .where(ClassModel.class_name == class_name)
+                .options(
+                    selectinload(ClassModel.subjects),
+                    selectinload(ClassModel.students),
+                )
+            )
+    
+            result = await self.session.execute(stmt)
+            class_instance: Optional[ClassModel] = result.scalars().first()
+    
+            if not class_instance:
+                return None
+    
+            subjects_data = [
+                ParticularSubjectSchemas(
+                    id=sub.id,
+                    title=sub.title,
+                    author=sub.author,
+                    enable=sub.enable,
+                    classId=sub.class_id,
+                )
+                for sub in class_instance.subjects
+            ]
+    
+            students_data = [
+                StudentInfoSchemas(
+                    id=student.id,
+                    fullName=student.full_name,
+                    identifier=student.identifier,
+                    classId=student.class_id,
+                )
+                for student in class_instance.students
+            ]
+    
+            return ClassFullDetails(
+                classId=class_instance.id,
+                className=class_instance.class_name,
+                teacherName=class_instance.teacher_name,
+                subjects=subjects_data,
+                students=students_data,
+            )

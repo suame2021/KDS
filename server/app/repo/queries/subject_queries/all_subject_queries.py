@@ -12,12 +12,17 @@ class AllSubjectQueries:
         self.class_query = ClassQueries(session)
         
     
-    async def check_subject_exist(self, title: str):
-        res = await self.session.execute(select(SubJectModel).where(SubJectModel.title == title))
+    async def check_subject_exist(self, title: str, class_id: UUID):
+        res = await self.session.execute(
+            select(SubJectModel)
+            .where(
+                SubJectModel.title == title,
+                SubJectModel.class_id == class_id
+            )
+        )
         output = res.scalar_one_or_none()
         return output
-    
-    
+
     async def get_all_subjects(self, class_id: UUID):
         sub = await self.session.execute(
             select(SubJectModel).where(SubJectModel.class_id == class_id)
@@ -47,7 +52,7 @@ class AllSubjectQueries:
 
    
     async def add_new_subject(self, add:AddNewSubjectSchemas):
-        check = await self.check_subject_exist(add.title)
+        check = await self.check_subject_exist(class_id=add.classId, title=add.title)
         if check is None:
             self.session.add(
                 SubJectModel(

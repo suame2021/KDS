@@ -7,7 +7,7 @@ from app.repo.queries.class_room_queries.class_queries import ClassQueries
 from app.repo.schemas.class_schemas.add_new_class_schemas import AddNewClassSchemas
 from app.utils.enums.class_room_enums import ClassRoomEnums
 from typing import Annotated, List
-from app.repo.schemas.class_schemas.class_schemas import ClassSchemas
+from app.repo.schemas.class_schemas.class_schemas import ClassFullDetails, ClassSchemas
 
 
 
@@ -63,3 +63,19 @@ async def delete_class(db: db_injection, className: Annotated[str, Query(..., de
         message="class was deleted successfully"
     )
     
+    
+
+@room.get("/get_class_full_info", response_model=DefaultServerApiRes[ClassFullDetails])
+async def get_class_full_info(db:db_injection, className: Annotated[str, Query(..., description="class id")]):
+    class_ = ClassQueries(db)
+    full_info = await class_.get_class_full_info(className)
+    
+    if full_info is None:
+        return JSONResponse(
+            content={"message":"no class Info had been added yet"}, status_code=404
+        )
+    return DefaultServerApiRes(
+        statusCode=200,
+        message="class full infomation",
+        data=full_info
+    )

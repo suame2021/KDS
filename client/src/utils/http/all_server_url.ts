@@ -16,7 +16,9 @@ export class AllServerUrls {
     static classUrls: string = `${AllServerUrls.backendUrl}/class`
     static getAllClassUlr: string = `${AllServerUrls.classUrls}/all_classess`
     static addNewClass: string = `${AllServerUrls.classUrls}/add_class`
-    static deleteClass:string = `${AllServerUrls.classUrls}/delete_class`
+    static deleteClass: string = `${AllServerUrls.classUrls}/delete_class`
+    static getClassInfo: string = `${AllServerUrls.classUrls}/get_class_full_info`
+
 
 
     // al student url
@@ -25,7 +27,7 @@ export class AllServerUrls {
 
     // all subject url
     static getAllSubjects: string = `${AllServerUrls.backendUrl}/subjects/get_all_subject`
-
+    static addNewSubject: string = `${AllServerUrls.backendUrl}/subjects/add_subject`
 
 
     // all time url
