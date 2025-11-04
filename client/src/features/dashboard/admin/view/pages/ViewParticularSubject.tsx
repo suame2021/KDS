@@ -1,11 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { Search, Plus } from "lucide-react";
-import { useNavigationStore } from "../../../../../utils/hooks/use_navigation_store";
+import { Search } from "lucide-react";
 import { useNotificationStore } from "../../../../../utils/hooks/use_notification_store";
-import { AppUrl } from "../../../../../common/routes/app_urls";
 import { useFullSubjectStore } from "../../../../../utils/hooks/use_subject_full_info";
 import AddTimerPopUp from "../components/AddTimerPopUp";
+import UploadStudentQuestion from "../components/UploadStudentQuestion";
 
 export default function ViewParticularSubject() {
   const { subjectId, subjectTitle } = useParams<{
@@ -13,14 +12,13 @@ export default function ViewParticularSubject() {
     subjectTitle: string;
   }>();
 
-  const { navigate } = useNavigationStore();
   const { showNotification } = useNotificationStore();
   const { subjectData, getSubjectFullInfo, isLoading } = useFullSubjectStore();
-  const [showTimerPopup, setShowTimerPopup] = useState(false);
 
+  const [showTimerPopup, setShowTimerPopup] = useState(false);
+  const [showAddQuestionPopup, setShowAddQuestionPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch subject info from backend
   useEffect(() => {
     if (subjectId && subjectTitle) {
       getSubjectFullInfo(subjectId, subjectTitle).catch(() => {
@@ -29,7 +27,6 @@ export default function ViewParticularSubject() {
     }
   }, [subjectId, subjectTitle]);
 
-  // Derived students (filtered)
   const filteredStudents = useMemo(() => {
     if (!subjectData?.students) return [];
     return subjectData.students.filter(
@@ -50,7 +47,6 @@ export default function ViewParticularSubject() {
 
   const { timer, question, students } = subjectData;
 
-
   return (
     <>
       <div className="admin-container mt-5">
@@ -62,8 +58,7 @@ export default function ViewParticularSubject() {
                 <div>
                   <h3 className="mb-1 text-primary">{subjectTitle}</h3>
                   <p className="text-muted mb-0">
-                    Students:{" "}
-                    <strong>{students?.length || 0}</strong> • Timer:{" "}
+                    Students: <strong>{students?.length || 0}</strong> • Timer:{" "}
                     {timer ? (
                       <span className="badge bg-info text-dark">
                         {timer.hr.toString().padStart(2, "0")}h{" "}
@@ -80,36 +75,39 @@ export default function ViewParticularSubject() {
 
                 {/* Buttons Section */}
                 <div className="d-flex flex-column align-items-end">
-                  {/* Conditional Add Timer */}
-                  {(
-                    <button
-                      className="btn btn-outline-primary btn-sm mb-2"
-                      onClick={() => setShowTimerPopup(true)}
-                    >
-                      
-                      ⏱{!timer?" Add Timer": " Update Timer" } 
-                    </button>
-                  )}
+                  <button
+                    className="btn btn-outline-primary btn-sm mb-2"
+                    onClick={() => setShowTimerPopup(true)}
+                  >
+                    ⏱{!timer ? " Add Timer" : " Update Timer"}
+                  </button>
 
-                  {/* Conditional Add Questions */}
                   {!question && (
                     <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() =>
-                        navigate(
-                          `/admin/${AppUrl.build(AppUrl.addQuestions, {
-                            subjectId: subjectId!,
-                          })}`
-                        )
-                      }
+                      className="btn btn-primary btn-sm mb-2"
+                      onClick={() => setShowAddQuestionPopup(true)}
                     >
                       ➕ Add Questions
                     </button>
                   )}
+
+                  <button
+                    className="btn btn-outline-success btn-sm mb-2"
+                    onClick={() => { }}
+                  >
+                    📄 {"Generate Excel Record"}
+                  </button>
+
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => { }}
+                  >
+                    ❌ {"Drop Question"}
+                  </button>
                 </div>
               </div>
 
-              {/* Search + Add Student */}
+              {/* Search */}
               <div className="mb-3 position-relative d-flex align-items-center">
                 <div className="position-relative" style={{ flexGrow: 1 }}>
                   <input
@@ -130,21 +128,6 @@ export default function ViewParticularSubject() {
                     }}
                   />
                 </div>
-
-                {/* Add Student Button */}
-                <button
-                  className="btn btn-success btn-sm ms-3 d-flex align-items-center"
-                  onClick={() =>
-                    navigate(
-                      `/admin/${AppUrl.build(AppUrl.addStudentToSubject, {
-                        subjectId: subjectId!,
-                      })}`
-                    )
-                  }
-                >
-                  <Plus size={16} className="me-1" />
-                  Add Student
-                </button>
               </div>
 
               {/* Student Table */}
@@ -159,9 +142,11 @@ export default function ViewParticularSubject() {
                 <table className="table table-hover align-middle">
                   <thead className="table-light sticky-top">
                     <tr>
-                      <th style={{ width: "5%" }}>#</th>
-                      <th style={{ width: "45%" }}>Student Name</th>
-                      <th style={{ width: "50%" }}>Identifier</th>
+                      <th>#</th>
+                      <th>Student Name</th>
+                      <th>Identifier</th>
+                      <th>Subject</th>
+                      <th>Score</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -175,11 +160,17 @@ export default function ViewParticularSubject() {
                               {student.identifier}
                             </span>
                           </td>
+                          <td>{subjectTitle}</td>
+                          <td>
+                            {student.score !== undefined
+                              ? `${student.score}%`
+                              : "—"}
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={3} className="text-center text-muted py-4">
+                        <td colSpan={5} className="text-center text-muted py-4">
                           No matching students found 😕
                         </td>
                       </tr>
@@ -192,17 +183,35 @@ export default function ViewParticularSubject() {
         </div>
       </div>
 
+      {/* Popups */}
       {showTimerPopup && (
         <AddTimerPopUp
           subjectTitle={subjectTitle!}
           subjectId={subjectId!}
           onClose={() => setShowTimerPopup(false)}
-          onSave={(data) => {
+          onSave={() => {
             setShowTimerPopup(false);
+            getSubjectFullInfo(subjectId!, subjectTitle!);
           }}
         />
       )}
 
+      {showAddQuestionPopup && (
+        <UploadStudentQuestion
+          subject_id={subjectId!}
+          onSave={() =>
+            getSubjectFullInfo(subjectId!, subjectTitle!).catch(() =>
+              showNotification("Failed to load subject info", "error")
+            )
+          }
+          onClose={() => setShowAddQuestionPopup(false)}
+          onUploadExcel={() =>
+            getSubjectFullInfo(subjectId!, subjectTitle!).catch(() =>
+              showNotification("Failed to load subject info", "error")
+            )
+          }
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 from typing import Optional
-from app.repo.schemas.subject_schemas.add_new_subject import  AddNewSubjectSchemas, ParticularSubjectSchemas, StudentSubInfo, SubjectById, SubjectFullInfo, SubjectInfoSchemas
+from app.repo.schemas.subject_schemas.add_new_subject import  AddNewSubjectSchemas, ParticularSubjectSchemas, StudentSubInfo, SubjectById, SubjectFullInfo, SubjectInfoSchemas, TotalQuestions
 from app.utils.enums.auth_enums import AuthEums
 from app.repo.queries.class_room_queries.class_queries import ClassQueries
 from app.repo.models.subject.student_scores_model import StudentScoreModel
@@ -114,8 +114,15 @@ class AllSubjectQueries:
                     sec=timer_model.sec,
                     subjectId=timer_model.subject_id
                 )
+            
+            questions = None
+            if subject.question:
+                questions = TotalQuestions(
+                    title=subject_title,
+                    available= subject.question is not None
+                )
             return SubjectFullInfo(
                 timer=timer_schema,
-                question=subject.question,
+                question=questions,
                 students=student_list,
             )

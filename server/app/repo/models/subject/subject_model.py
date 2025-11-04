@@ -24,8 +24,7 @@ class SubJectModel(Base):
     # One-to-one with QuestionModel
     question: Mapped["QuestionModel"] = relationship(
         "QuestionModel",
-        back_populates="subject",
-        uselist=False,      
+        back_populates="subject",      
         cascade="all, delete-orphan"
     )
 

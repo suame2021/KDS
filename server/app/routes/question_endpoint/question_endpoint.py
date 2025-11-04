@@ -29,8 +29,9 @@ async def upload_questions(
     upload: UploadFile = File(...),
     
 ):
-
+    print(f"file name {upload.filename}")
     if not upload.filename.endswith(".xlsx"):
+        
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid file format. Only .xlsx files are accepted.",

@@ -35,12 +35,16 @@ class SubjectById(BaseModel):
     classId: UUID4
 
 
+class TotalQuestions(BaseModel):
+    title:str
+    available:bool
+
 class StudentSubInfo(BaseModel):
     studentName: str
-    identifier: int
+    identifier: str
     score: float
 
 class SubjectFullInfo(BaseModel):
     timer: Optional["AddNewTimerSchemas"] = None
-    question: Optional["GetQuestionSchemas"] = None
+    question: Optional[TotalQuestions] = None
     students: Optional[List[StudentSubInfo]] = None

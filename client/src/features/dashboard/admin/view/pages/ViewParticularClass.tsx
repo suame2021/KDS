@@ -1,10 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useViewClassInfoStore } from "../../../../../utils/hooks/use_view_class_info";
 import { AppUrl } from "../../../../../common/routes/app_urls";
 import { useNavigationStore } from "../../../../../utils/hooks/use_navigation_store";
 import { useNotificationStore } from "../../../../../utils/hooks/use_notification_store";
+import AddNewStudentToClass from "../components/AddNewStudentToClass";
 
 export default function ViewParticularClass() {
   const { className } = useParams<{ className: string }>();
@@ -12,6 +13,7 @@ export default function ViewParticularClass() {
   const { showNotification } = useNotificationStore();
   const [searchTerm, setSearchTerm] = useState("");
   const { navigate } = useNavigationStore();
+  const [showAddStudentPopup, setshowAddStudentPopup] = useState(false);
 
   useEffect(() => {
     if (className) {
@@ -39,123 +41,149 @@ export default function ViewParticularClass() {
   }
 
   return (
-    <div className="admin-container mt-5">
-      <div className="container">
-        <div className="card border-0 shadow-sm">
-          <div className="card-body">
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-start mb-4">
-              <div>
-                <h3 className="mb-1 text-primary">
-                  {viewClassData.className}
-                </h3>
-                <p className="text-muted mb-0">
-                  Teacher: <strong>{viewClassData.teacherName}</strong> •{" "}
-                  <strong>{viewClassData.subjects?.length || 0}</strong> subjects •{" "}
-                  <strong>{viewClassData.students?.length || 0}</strong> students
-                </p>
-              </div>
+    <>
+      <div className="admin-container mt-5">
+        <div className="container">
+          <div className="card border-0 shadow-sm">
+            <div className="card-body">
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                  <h3 className="mb-1 text-primary">
+                    {viewClassData.className}
+                  </h3>
+                  <p className="text-muted mb-0">
+                    Teacher: <strong>{viewClassData.teacherName}</strong> •{" "}
+                    <strong>{viewClassData.subjects?.length || 0}</strong> subjects •{" "}
+                    <strong>{viewClassData.students?.length || 0}</strong> students
+                  </p>
+                </div>
 
-              {/* Buttons */}
-              <div className="d-flex flex-column align-items-end">
-                <button
-                  className="btn btn-outline-primary btn-sm mb-2"
-                  onClick={() => {
-                    if (viewClassData.subjects.length === 0) {
-                      showNotification("No subject for this class yet", "info");
-                    } else {
+                {/* Buttons */}
+                <div className="d-flex flex-column align-items-end">
+                  <button
+                    className="btn btn-outline-primary btn-sm mb-2"
+                    onClick={() => {
+                      if (viewClassData.subjects.length === 0) {
+                        showNotification("No subject for this class yet", "info");
+                      } else {
+                        navigate(
+                          `/admin/${AppUrl.build(AppUrl.viewParticularClassSubject, {
+                            className: className!,
+                          })}`
+                        );
+                      }
+                    }}
+                  >
+                    View All Subjects
+                  </button>
+
+                  <button
+                    className="btn btn-primary btn-sm mb-2"
+                    onClick={() => {
                       navigate(
-                        `/admin/${AppUrl.build(AppUrl.viewParticularClassSubject, {
-                          className: className!,
+                        `/admin/${AppUrl.build(AppUrl.addNewSubject, {
+                          classId: viewClassData.classId!,
                         })}`
                       );
-                    }
-                  }}
-                >
-                  View All Subjects
-                </button>
+                    }}
+                  >
+                    + Add New Subject
+                  </button>
 
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => {
-                    navigate(
-                      `/admin/${AppUrl.build(AppUrl.addNewSubject, {
-                        classId: viewClassData.classId!,
-                      })}`
-                    );
-                  }}
-                >
-                  + Add New Subject
-                </button>
+                  <button
+                    className="btn btn-success btn-sm ms-3 d-flex align-items-center"
+                    onClick={() => setshowAddStudentPopup(true)}
+                  >
+                    <Plus size={16} className="me-1" />
+                    Register Student
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Search */}
-            <div className="mb-3 position-relative">
-              <input
-                type="text"
-                className="form-control form-control-sm ps-4"
-                placeholder="Search by name or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ maxWidth: "300px" }}
-              />
-              <Search
-                size={16}
-                className="text-secondary position-absolute"
+              {/* Search */}
+              <div className="mb-3 position-relative">
+                <input
+                  type="text"
+                  className="form-control form-control-sm ps-4"
+                  placeholder="Search by name or ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ maxWidth: "300px" }}
+                />
+                <Search
+                  size={16}
+                  className="text-secondary position-absolute"
+                  style={{
+                    left: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                />
+              </div>
+
+              {/* Table */}
+              <div
+                className="table-responsive"
                 style={{
-                  left: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
+                  maxHeight: "400px",
+                  overflowY: "auto",
+                  scrollbarColor: "rgba(108,117,125,0.6) transparent",
                 }}
-              />
-            </div>
-
-            {/* Table */}
-            <div
-              className="table-responsive"
-              style={{
-                maxHeight: "400px",
-                overflowY: "auto",
-                scrollbarColor: "rgba(108,117,125,0.6) transparent",
-              }}
-            >
-              <table className="table table-hover align-middle">
-                <thead className="table-light sticky-top">
-                  <tr>
-                    <th style={{ width: "5%" }}>#</th>
-                    <th style={{ width: "40%" }}>Student Name</th>
-                    <th style={{ width: "25%" }}>Identifier</th>
-                    <th style={{ width: "30%" }}>Class</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.length > 0 ? (
-                    filteredStudents.map((student, index) => (
-                      <tr key={student.id}>
-                        <td>{index + 1}</td>
-                        <td>{student.fullName}</td>
-                        <td>
-                          <span className="badge bg-secondary">
-                            {student.identifier}
-                          </span>
-                        </td>
-                        <td>{viewClassData.className}</td>
-                      </tr>
-                    ))
-                  ) : (
+              >
+                <table className="table table-hover align-middle">
+                  <thead className="table-light sticky-top">
                     <tr>
-                      <td colSpan={4} className="text-center text-muted py-4">
-                        No matching students found 😕
-                      </td>
+                      <th style={{ width: "5%" }}>#</th>
+                      <th style={{ width: "40%" }}>Student Name</th>
+                      <th style={{ width: "25%" }}>Identifier</th>
+                      <th style={{ width: "30%" }}>Class</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredStudents.length > 0 ? (
+                      filteredStudents.map((student, index) => (
+                        <tr key={student.id}>
+                          <td>{index + 1}</td>
+                          <td>{student.fullName}</td>
+                          <td>
+                            <span className="badge bg-secondary">
+                              {student.identifier}
+                            </span>
+                          </td>
+                          <td>{viewClassData.className}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="text-center text-muted py-4">
+                          No matching students found 😕
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {showAddStudentPopup && (
+        <AddNewStudentToClass
+        className={viewClassData.className}
+          classId={viewClassData.classId!}
+          onClose={() => setshowAddStudentPopup(false)}
+          onSave={(data) => {
+            console.log("New student:", data);
+            // call your API to add student
+          }}
+          onUploadExcel={(file, classId) => {
+            console.log("Uploading Excel for class:", classId, file);
+          }}
+        />
+      )}
+
+    </>
   );
 }

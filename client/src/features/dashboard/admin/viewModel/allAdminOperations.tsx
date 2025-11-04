@@ -8,9 +8,12 @@ import { useAuthTokenStore } from "../../../../utils/hooks/use_auth_token_store"
 import { useNotificationStore } from "../../../../utils/hooks/use_notification_store"
 import { useClassCreationStore } from "../../../../utils/hooks/use_class_creation_store"
 import type { AddNewSubjectForm } from "../view/pages/AddNewClass"
-import { SubjectModel, SubjectModelWithOutId } from "../../../../common/model/classModels/subject_model"
+import { SubjectModelWithOutId } from "../../../../common/model/classModels/subject_model"
 import type { AddTimerFormValues } from "../view/components/AddTimerPopUp"
 import { useIsAuthenticatedStore } from "../../../../utils/hooks/use_is_authenticated_store"
+import type { AddNewStudentForm } from "../view/components/AddNewStudentToClass"
+import { useLoadingStore } from "../../../../utils/hooks/use_loading_state"
+import type { UploadExmaExcelForm } from "../view/components/UploadStudentQuestion"
 
 type addClassType<T extends ClassFormValues> = {
   data: T
@@ -23,7 +26,17 @@ type addSubjectType<T extends AddNewSubjectForm> = {
   setError: UseFormSetError<T>
 }
 
-type addTimerType<T extends AddTimerFormValues>={
+type addTimerType<T extends AddTimerFormValues> = {
+  dt: T
+  setError: UseFormSetError<T>
+}
+
+type registerUseManually<T extends AddNewStudentForm> = {
+  dt: T
+  setError: UseFormSetError<T>
+}
+
+type uploadQuestionParam<T extends UploadExmaExcelForm> = {
   dt:T
   setError: UseFormSetError<T>
 }
@@ -95,7 +108,7 @@ export class AllAdminOperation {
 
       // Handle notification based on status
       showNotification(res.message, res.statusCode === 200 ? "success" : "error");
-      
+
       // Optionally return response data
       return res;
     } catch (err: any) {
@@ -105,7 +118,7 @@ export class AllAdminOperation {
     }
   }
 
-static async addTimer({ dt, setError }: addTimerType<AddTimerFormValues>) {
+  static async addTimer({ dt, setError }: addTimerType<AddTimerFormValues>) {
     const { isAuthenticated } = useIsAuthenticatedStore.getState();
     const { token } = useAuthTokenStore.getState();
     const { showNotification } = useNotificationStore.getState();
@@ -142,4 +155,70 @@ static async addTimer({ dt, setError }: addTimerType<AddTimerFormValues>) {
       showNotification("Something went wrong while adding timer", "error");
     }
   }
+
+  static async registerUseManually({
+    dt,
+    setError,
+  }: registerUseManually<AddNewStudentForm>) {
+    const { token } = useAuthTokenStore.getState();
+    const { showNotification } = useNotificationStore.getState();
+    const { setLoadingState } = useLoadingStore.getState()
+
+    try {
+      setLoadingState(true)
+      const res = await DefaultRequestSetUp.post<AddNewStudentForm, void>({
+        url: AllServerUrls.registerStudent,
+        token: token!,
+        data: dt,
+      });
+
+
+      if (res.statusCode === 200) {
+        showNotification(res.message || "Student successfully registered", "success");
+        return res;
+      } else {
+
+        showNotification(res.message || "Failed to register student", "error");
+        setError("identifier", { message: res.message || "Registration failed" });
+      }
+    } catch (err: any) {
+      console.error("Error registering student:", err);
+      showNotification("Something went wrong while registering", "error");
+      setError("full_name", { message: "An unexpected error occurred" });
+    } finally {
+      setLoadingState(false)
+    }
+  }
+
+
+
+static async uploadQuestion({ dt, setError }: uploadQuestionParam<UploadExmaExcelForm>) {
+  const { token } = useAuthTokenStore.getState();
+
+  try {
+    // Build FormData
+    const formData = new FormData();
+    formData.append("upload", dt.file[0]); // Excel file
+
+   
+    const url = `${AllServerUrls.uploadQuestion}?subject_id=${dt.subject_id}`;
+    const res = await DefaultRequestSetUp.post<FormData, void>({
+      url,
+      data: formData,
+      token: token!,
+    });
+
+    if (res.statusCode !== 200) {
+      setError("file", { message: res.message || "Upload failed" });
+      return;
+    }
+
+    useNotificationStore.getState().showNotification(res.message, "success")
+    return res;
+  } catch (err: any) {
+    useNotificationStore.getState().showNotification("an erro occured while uploading", "error")
+    console.error("❌ Upload error:", err);
+    setError("file", { message: err.message || "Upload failed" });
+  }
+}
 }

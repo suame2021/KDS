@@ -7,6 +7,7 @@ export class AllServerUrls {
 
     // auth url
     static login: string = `${AllServerUrls.backendUrl}/auth/login`
+    static registerStudent:string = `${AllServerUrls.backendUrl}/auth/register`
     static getRefreshToken: string = `${AllServerUrls.backendUrl}/auth/refresh_token`
     static currentUser: string = `${AllServerUrls.backendUrl}/auth/current_user`
     static logout: string = `${AllServerUrls.backendUrl}/auth/logout`
@@ -39,6 +40,7 @@ export class AllServerUrls {
 
     // all question url
     static getAllQuestion: string = `${AllServerUrls.backendUrl}/question/get_questions`
+    static uploadQuestion: string = `${AllServerUrls.backendUrl}/question/add_question`
 
 
 
