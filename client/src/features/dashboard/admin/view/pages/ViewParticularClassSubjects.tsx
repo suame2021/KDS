@@ -2,10 +2,13 @@ import { useParams } from "react-router-dom";
 import SubjectTile from "../components/SubjectTile";
 import { useEffect, useState } from "react";
 import { useViewClassInfoStore } from "../../../../../utils/hooks/use_view_class_info";
+import { useNavigationStore } from "../../../../../utils/hooks/use_navigation_store";
+import { AppUrl } from "../../../../../common/routes/app_urls";
 
 export default function ViewParticularClassSubjects() {
   const { viewClassData, getClassInfo } = useViewClassInfoStore();
   const { className } = useParams();
+  const {navigate} = useNavigationStore()
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -38,7 +41,7 @@ export default function ViewParticularClassSubjects() {
             <div className="all-class-body">
               {filteredSubjects && filteredSubjects.length > 0 ? (
                 filteredSubjects.map((sub, key) => (
-                  <SubjectTile key={key} sub={sub} />
+                  <SubjectTile key={key} sub={sub} onView={()=>navigate(`/admin/${AppUrl.build(AppUrl.viewParticularSubject, { subjectId: sub.id, subjectTitle: sub.title })}`)}/>
                 ))
               ) : (
                 <p>No subject found{searchTerm ? ` for "${searchTerm}"` : ""}.</p>

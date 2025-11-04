@@ -9,6 +9,8 @@ import { useNotificationStore } from "../../../../utils/hooks/use_notification_s
 import { useClassCreationStore } from "../../../../utils/hooks/use_class_creation_store"
 import type { AddNewSubjectForm } from "../view/pages/AddNewClass"
 import { SubjectModel, SubjectModelWithOutId } from "../../../../common/model/classModels/subject_model"
+import type { AddTimerFormValues } from "../view/components/AddTimerPopUp"
+import { useIsAuthenticatedStore } from "../../../../utils/hooks/use_is_authenticated_store"
 
 type addClassType<T extends ClassFormValues> = {
   data: T
@@ -18,6 +20,11 @@ type addClassType<T extends ClassFormValues> = {
 
 type addSubjectType<T extends AddNewSubjectForm> = {
   dt: T
+  setError: UseFormSetError<T>
+}
+
+type addTimerType<T extends AddTimerFormValues>={
+  dt:T
   setError: UseFormSetError<T>
 }
 
@@ -95,6 +102,44 @@ export class AllAdminOperation {
       console.error("Error adding subject:", err);
       showNotification("Something went wrong", "error");
       setError("title", { message: "Failed to create subject" });
+    }
+  }
+
+static async addTimer({ dt, setError }: addTimerType<AddTimerFormValues>) {
+    const { isAuthenticated } = useIsAuthenticatedStore.getState();
+    const { token } = useAuthTokenStore.getState();
+    const { showNotification } = useNotificationStore.getState();
+
+    if (!isAuthenticated || !token) {
+      showNotification("You must be logged in to perform this action.", "error");
+      return;
+    }
+
+    try {
+      const payload = {
+        hr: dt.hours,
+        mins: dt.minutes,
+        sec: dt.seconds,
+        subjectId: dt.subjectId,
+      };
+
+      const res = await DefaultRequestSetUp.post<typeof payload, void>({
+        url: AllServerUrls.setTimer,
+        token,
+        data: payload,
+      });
+
+      if (res.statusCode === 200) {
+        showNotification(res.message || "Timer added successfully!", "success");
+      } else {
+        showNotification(res.message || "Failed to add timer", "error");
+      }
+
+      return res;
+    } catch (err: any) {
+      console.error("Error adding timer:", err);
+      setError("hours", { message: "Failed to add timer" });
+      showNotification("Something went wrong while adding timer", "error");
     }
   }
 }

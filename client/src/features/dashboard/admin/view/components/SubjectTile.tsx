@@ -1,7 +1,13 @@
 import type { SubjectModel } from "../../../../../common/model/classModels/subject_model";
 
 
-export default function SubjectTile({sub}: {sub: SubjectModel}) {
+interface subParams{
+    sub:SubjectModel,
+    onView:()=>void
+}
+
+
+export default function SubjectTile({sub, onView}:subParams) {
 
     return <>
         <div className="card p-3 mb-3 shadow-sm border-0 d-flex flex-row justify-content-between align-items-center">
@@ -17,7 +23,7 @@ export default function SubjectTile({sub}: {sub: SubjectModel}) {
             <div className="d-flex gap-2">
                 <button
                     className="btn btn-outline-primary btn-sm px-3 py-1"
-                    onClick={() => { }}
+                    onClick={() => { onView()}}
                 >
                     View Sub
                 </button>

@@ -26,12 +26,14 @@ export class AllServerUrls {
 
 
     // all subject url
+    static subjects:string = `${AllServerUrls.backendUrl}/subjects`
     static getAllSubjects: string = `${AllServerUrls.backendUrl}/subjects/get_all_subject`
     static addNewSubject: string = `${AllServerUrls.backendUrl}/subjects/add_subject`
 
 
     // all time url
     static getExamTime: string = `${AllServerUrls.backendUrl}/timer/get_exam_time`
+    static setTimer:string = `${AllServerUrls.backendUrl}/timer/set_timer`
 
 
 

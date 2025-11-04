@@ -9,8 +9,12 @@ export class AppUrl {
 
     static adminPath: string = "/admin"
     static viewParticularClass: string = "class/:className"
-    static viewParticularClassSubject:string = "class/:className/subject"
-    static addNewSubject:string = "class/:classId/add-subject"
+    static viewParticularClassSubject: string = "class/:className/subject"
+    static addNewSubject: string = "class/:classId/add-subject"
+    static viewParticularSubject: string = "class/subject/:subjectId/:subjectTitle"
+    static addTimer: string = ''
+    static addQuestions: string = ''
+    static addStudentToSubject: string = ''
 
 
 

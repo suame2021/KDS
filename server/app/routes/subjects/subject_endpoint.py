@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from app.repo.schemas.default_server_res import DefaultServerApiRes
 from app.repo import db_injection
 from app.repo.queries.subject_queries.all_subject_queries import AllSubjectQueries
-from app.repo.schemas.subject_schemas.add_new_subject import AddNewSubjectSchemas, SubjectById, SubjectInfoSchemas, ParticularSubjectSchemas
+from app.repo.schemas.subject_schemas.add_new_subject import AddNewSubjectSchemas, SubjectById, SubjectFullInfo, SubjectInfoSchemas, ParticularSubjectSchemas
 from typing import Annotated, List
 
 from app.utils.enums.auth_enums import AuthEums
@@ -65,3 +65,27 @@ async def add_subject(db: db_injection, add: AddNewSubjectSchemas):
             message="An unexpected error occurred while creating the subject",
             data=None,
         )
+
+
+
+@subject_endpoint.get("/{subject_id}/{subject_title}", response_model=DefaultServerApiRes[SubjectFullInfo])
+async def get_full_subject_info(
+    subject_id: UUID,
+    subject_title: str,
+    db: db_injection
+):
+    repo = AllSubjectQueries(db)
+    subject_info = await repo.get_subject_full_info(subject_id=subject_id, subject_title=subject_title)
+
+    if not subject_info:
+        return JSONResponse(
+            status_code=404,
+            content={"message": "Subject not found or title mismatch"}
+        )
+        
+
+    return DefaultServerApiRes(
+        statusCode=200,
+        message="subject full info",
+        data=subject_info
+    )

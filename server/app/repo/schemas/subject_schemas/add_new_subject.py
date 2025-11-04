@@ -1,5 +1,9 @@
 from typing import TypeVar, Generic, Optional, List
+import datetime
 from pydantic import BaseModel, UUID4
+
+from app.repo.schemas.subject_schemas.all_questions_schemas import GetQuestionSchemas
+from app.repo.schemas.timer_schemas.all_timer_schemas import AddNewTimerSchemas
 
 
 T = TypeVar("T")
@@ -29,3 +33,14 @@ class SubjectInfoSchemas(BaseModel, Generic[T]):
 
 class SubjectById(BaseModel):
     classId: UUID4
+
+
+class StudentSubInfo(BaseModel):
+    studentName: str
+    identifier: int
+    score: float
+
+class SubjectFullInfo(BaseModel):
+    timer: Optional["AddNewTimerSchemas"] = None
+    question: Optional["GetQuestionSchemas"] = None
+    students: Optional[List[StudentSubInfo]] = None

@@ -12,6 +12,7 @@ import AdminDashBoard from "../../features/dashboard/admin/view/pages/AdminDashB
 import ViewParticularClass from "../../features/dashboard/admin/view/pages/ViewParticularClass";
 import ViewParticularClassSubjects from "../../features/dashboard/admin/view/pages/ViewParticularClassSubjects";
 import AddNewSubject from "../../features/dashboard/admin/view/pages/AddNewClass";
+import ViewParticularSubject from "../../features/dashboard/admin/view/pages/ViewParticularSubject";
 
 export default function MainRoute() {
     return <>
@@ -33,6 +34,7 @@ export default function MainRoute() {
                         <Route path={AppUrl.viewParticularClass} element={<ViewParticularClass/>}/>
                         <Route path={AppUrl.viewParticularClassSubject} element={<ViewParticularClassSubjects/>}/>
                         <Route path={AppUrl.addNewSubject} element={<AddNewSubject/>}/>
+                        <Route path={AppUrl.viewParticularSubject} element={<ViewParticularSubject/>}/>
                         </Route>
 
                     </Route>
