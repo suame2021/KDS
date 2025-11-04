@@ -30,6 +30,8 @@ export class AllServerUrls {
     static subjects:string = `${AllServerUrls.backendUrl}/subjects`
     static getAllSubjects: string = `${AllServerUrls.backendUrl}/subjects/get_all_subject`
     static addNewSubject: string = `${AllServerUrls.backendUrl}/subjects/add_subject`
+    static generateRecord:string = `${AllServerUrls.backendUrl}/subjects/generate_record`
+    // generate_record
 
 
     // all time url

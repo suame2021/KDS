@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import UUID4, BaseModel
 
 
@@ -18,3 +18,16 @@ class AddScoreSchemas(BaseModel):
 class ScoreIdInfo(BaseModel):
     subjectId:UUID4
     studentId:UUID4
+    
+
+class StudentScoreInfo(BaseModel):
+    studentName:str
+    identifier:str
+    score:float
+    
+
+
+class StudentScoreRecord(BaseModel):
+    className:str
+    subject:str
+    students:Optional[list[StudentScoreInfo]]

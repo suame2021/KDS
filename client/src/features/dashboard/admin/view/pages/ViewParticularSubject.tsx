@@ -7,6 +7,7 @@ import AddTimerPopUp from "../components/AddTimerPopUp";
 import UploadStudentQuestion from "../components/UploadStudentQuestion";
 import { usePopupStore } from "../../../../../utils/hooks/use_pop_up_menu";
 import { AllAdminOperation } from "../../viewModel/allAdminOperations";
+import { useGenerateRecordStore } from "../../../../../utils/hooks/use_generate_records";
 
 export default function ViewParticularSubject() {
   const { subjectId, subjectTitle } = useParams<{
@@ -21,6 +22,7 @@ export default function ViewParticularSubject() {
   const [showAddQuestionPopup, setShowAddQuestionPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { openPopup, closePopup } = usePopupStore.getState()
+  const {sendStudentRecord} = useGenerateRecordStore()
 
   useEffect(() => {
     if (subjectId && subjectTitle) {
@@ -101,7 +103,9 @@ export default function ViewParticularSubject() {
                           openPopup({
                             title: "Generate excel record",
                             message: "Do you wish to carry out with this operation!!!",
-                            onContinue: async () => { },
+                            onContinue: async () => { 
+                              await sendStudentRecord(students, subjectTitle!)
+                            },
                             onCancel: () => closePopup(),
                           })
                         }}
@@ -122,6 +126,7 @@ export default function ViewParticularSubject() {
                             onContinue: async () => { 
                               var res = await AllAdminOperation.deleteQuestions({subjectId:subjectId!})
                               if(res){
+                                if(students.length !== 0) await sendStudentRecord(students, subjectTitle!)
                                 await getSubjectFullInfo(subjectId!, subjectTitle!)
                               }
                             },

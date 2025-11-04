@@ -25,7 +25,10 @@ export default function ClassCardTile({
       <div className="d-flex gap-2">
         <button
           className="btn btn-outline-primary btn-sm px-3 py-1"
-          onClick={onView}
+          onClick={()=>{
+            onView()
+            sessionStorage.setItem("currentClass", className)
+          }}
         >
           View Class
         </button>
