@@ -5,6 +5,8 @@ import { useNotificationStore } from "../../../../../utils/hooks/use_notificatio
 import { useFullSubjectStore } from "../../../../../utils/hooks/use_subject_full_info";
 import AddTimerPopUp from "../components/AddTimerPopUp";
 import UploadStudentQuestion from "../components/UploadStudentQuestion";
+import { usePopupStore } from "../../../../../utils/hooks/use_pop_up_menu";
+import { AllAdminOperation } from "../../viewModel/allAdminOperations";
 
 export default function ViewParticularSubject() {
   const { subjectId, subjectTitle } = useParams<{
@@ -18,6 +20,7 @@ export default function ViewParticularSubject() {
   const [showTimerPopup, setShowTimerPopup] = useState(false);
   const [showAddQuestionPopup, setShowAddQuestionPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const { openPopup, closePopup } = usePopupStore.getState()
 
   useEffect(() => {
     if (subjectId && subjectTitle) {
@@ -90,20 +93,46 @@ export default function ViewParticularSubject() {
                       ➕ Add Questions
                     </button>
                   )}
+                  {
+                    students.length !== 0 && (
+                      <button
+                        className="btn btn-outline-success btn-sm mb-2"
+                        onClick={() => {
+                          openPopup({
+                            title: "Generate excel record",
+                            message: "Do you wish to carry out with this operation!!!",
+                            onContinue: async () => { },
+                            onCancel: () => closePopup(),
+                          })
+                        }}
+                      >
+                        📄 {"Generate Excel Record"}
+                      </button>
+                    )
+                  }
 
-                  <button
-                    className="btn btn-outline-success btn-sm mb-2"
-                    onClick={() => { }}
-                  >
-                    📄 {"Generate Excel Record"}
-                  </button>
-
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => { }}
-                  >
-                    ❌ {"Drop Question"}
-                  </button>
+                  {
+                    question && (
+                      <button
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => {
+                          openPopup({
+                            title: "Delete uploaded question",
+                            message: "Do you want to delete the current current question!!",
+                            onContinue: async () => { 
+                              var res = await AllAdminOperation.deleteQuestions({subjectId:subjectId!})
+                              if(res){
+                                await getSubjectFullInfo(subjectId!, subjectTitle!)
+                              }
+                            },
+                            onCancel: () => closePopup(),
+                          })
+                        }}
+                      >
+                        ❌ {"Drop Question"}
+                      </button>
+                    )
+                  }
                 </div>
               </div>
 

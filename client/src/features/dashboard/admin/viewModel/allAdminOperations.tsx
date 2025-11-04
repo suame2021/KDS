@@ -37,7 +37,7 @@ type registerUseManually<T extends AddNewStudentForm> = {
 }
 
 type uploadQuestionParam<T extends UploadExmaExcelForm> = {
-  dt:T
+  dt: T
   setError: UseFormSetError<T>
 }
 
@@ -192,33 +192,39 @@ export class AllAdminOperation {
 
 
 
-static async uploadQuestion({ dt, setError }: uploadQuestionParam<UploadExmaExcelForm>) {
-  const { token } = useAuthTokenStore.getState();
+  static async uploadQuestion({ dt, setError }: uploadQuestionParam<UploadExmaExcelForm>) {
+    const { token } = useAuthTokenStore.getState();
 
-  try {
-    // Build FormData
-    const formData = new FormData();
-    formData.append("upload", dt.file[0]); // Excel file
+    try {
+      // Build FormData
+      const formData = new FormData();
+      formData.append("upload", dt.file[0]); // Excel file
 
-   
-    const url = `${AllServerUrls.uploadQuestion}?subject_id=${dt.subject_id}`;
-    const res = await DefaultRequestSetUp.post<FormData, void>({
-      url,
-      data: formData,
-      token: token!,
-    });
 
-    if (res.statusCode !== 200) {
-      setError("file", { message: res.message || "Upload failed" });
-      return;
+      const url = `${AllServerUrls.uploadQuestion}?subject_id=${dt.subject_id}`;
+      const res = await DefaultRequestSetUp.post<FormData, void>({
+        url,
+        data: formData,
+        token: token!,
+      });
+
+      if (res.statusCode !== 200) {
+        setError("file", { message: res.message || "Upload failed" });
+        return;
+      }
+
+      useNotificationStore.getState().showNotification(res.message, "success")
+      return res;
+    } catch (err: any) {
+      useNotificationStore.getState().showNotification("an erro occured while uploading", "error")
+      console.error("❌ Upload error:", err);
+      setError("file", { message: err.message || "Upload failed" });
     }
-
-    useNotificationStore.getState().showNotification(res.message, "success")
-    return res;
-  } catch (err: any) {
-    useNotificationStore.getState().showNotification("an erro occured while uploading", "error")
-    console.error("❌ Upload error:", err);
-    setError("file", { message: err.message || "Upload failed" });
   }
-}
+
+  static async deleteQuestions({subjectId}:{subjectId:string}){
+    var res = await DefaultRequestSetUp.delete<void, boolean>({url:`${AllServerUrls.deleteQuestion}?subjectId=${subjectId}`})
+    useNotificationStore.getState().showNotification(res.message, res.statusCode === 200 ? "success":"info")
+    return res.data
+  }
 }

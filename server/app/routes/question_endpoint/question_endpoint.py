@@ -98,3 +98,17 @@ async def get_questions(
         )
         
 
+@question_endpoint.delete("/delete_questions", response_model=DefaultServerApiRes[bool])
+async def delete_questions(db:db_injection, subjectId:Annotated[UUID, Query(..., description="delete subject by id")]):
+    repo = AllQuestionQueries(db)
+    delete_all = await repo.clear_old_question(subjectId)
+    if delete_all == AuthEums.ERROR:
+        return JSONResponse(
+            content={"message":"an error occured while deleting question", "data":False},
+            status_code=400
+        )
+    return DefaultServerApiRes(
+        statusCode=200,
+        message="deleted all questions",
+        data=True
+    )

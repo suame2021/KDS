@@ -41,6 +41,7 @@ export class AllServerUrls {
     // all question url
     static getAllQuestion: string = `${AllServerUrls.backendUrl}/question/get_questions`
     static uploadQuestion: string = `${AllServerUrls.backendUrl}/question/add_question`
+    static deleteQuestion: string = `${AllServerUrls.backendUrl}/question/delete_questions`
 
 
 

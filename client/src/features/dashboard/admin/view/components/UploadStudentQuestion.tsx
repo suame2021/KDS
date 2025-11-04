@@ -14,9 +14,10 @@ interface UploadStudentQuestionProps {
 }
 
 export default function UploadStudentQuestion({
+
   subject_id,
   onClose,
-  onUploadExcel,
+  onSave,
 }: UploadStudentQuestionProps) {
   const {
     register,
@@ -35,6 +36,7 @@ export default function UploadStudentQuestion({
     }
     var res = await AllAdminOperation.uploadQuestion({dt:data, setError:setError})
     if(res?.statusCode === 200){
+      onSave()
         onClose()
         reset();
     }

@@ -5,6 +5,10 @@ from uuid import UUID, uuid4
 from app.utils.enums.auth_enums import AuthEums
 from app.repo.schemas.subject_schemas.all_questions_schemas import GetQuestionSchemas, SubmittedQ
 from random import shuffle
+from sqlalchemy import delete
+
+from app.repo.models.subject.student_scores_model import StudentScoreModel
+
 class AllQuestionQueries:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -65,7 +69,17 @@ class AllQuestionQueries:
             return dt
             
     async def clear_old_question(self, subject_id: UUID):
-        stmt = await self.session.execute(select(QuestionModel).where(QuestionModel.subject_id == subject_id))
-        self.session.delete(
-            
-        )
+        try:
+            # Perform bulk delete for all questions tied to that subject
+            await self.session.execute(
+                delete(QuestionModel).where(QuestionModel.subject_id == subject_id)
+            )
+            await self.session.execute(
+                delete(StudentScoreModel).where(StudentScoreModel.subject_id == subject_id)
+            )
+            await self.session.commit()
+            return AuthEums.OK
+        except Exception as e:
+            await self.session.rollback()
+            print("❌ clear_old_question error:", e)
+            return AuthEums.ERROR
