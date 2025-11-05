@@ -207,7 +207,7 @@ export default function ViewParticularClass() {
 
             // call your API to add student
           }}
-          onUploadExcel={(file, classId) => {
+          onUploadExcel={() => {
 
           }}
         />

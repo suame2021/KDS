@@ -11,7 +11,7 @@ import { AllExamOperations } from "../../viewModel/allExamsOperation";
 
 export default function ExamPreParation() {
   const {
-    selectedExam, timer, isTimerRunning,  allAvaliableQuestions, clear, getExamStats, getAllAvaliableQuestions
+    selectedExam, timer, isTimerRunning, clear, getExamStats, getAllAvaliableQuestions
   } = useSelectedExam()
   const { navigate } = useNavigationStore()
   const { subjects } = useAllSubjects()

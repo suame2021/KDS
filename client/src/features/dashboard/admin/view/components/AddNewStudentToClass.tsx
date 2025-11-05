@@ -52,7 +52,6 @@ export default function AddNewStudentToClass({
         register: registerExcel,
         handleSubmit: handleExcelSubmit,
         reset: resetExcel,
-        setError: setErrorExel,
         formState: { errors: excelErrors, isSubmitting },
     } = useForm<UploadExcelForm>({
         defaultValues: { class_id: classId },

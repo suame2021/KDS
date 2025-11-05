@@ -1,5 +1,9 @@
+import os
 from fastapi import FastAPI
 import contextlib
+
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from app.repo import db_session_manager
 from app.routes import register_all_routes
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,3 +45,19 @@ app.add_middleware(
 
 
 
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))  # go up to project_root
+FRONTEND_DIST = os.path.join(BASE_DIR, "client", "dist")
+
+# Debug check
+if not os.path.exists(FRONTEND_DIST):
+    print("⚠️ React dist folder not found at:", FRONTEND_DIST)
+
+# Serve static assets (JS, CSS, etc.)
+app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
+
+# Serve React index.html for all routes (SPA)
+@app.get("/{full_path:path}")
+async def serve_react(full_path: str):
+    index_path = os.path.join(FRONTEND_DIST, "index.html")
+    return FileResponse(index_path)
