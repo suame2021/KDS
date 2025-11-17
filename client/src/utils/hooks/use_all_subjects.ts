@@ -9,12 +9,13 @@ export interface AllSubjectInterface {
   className: string
   teacherName: string
   classId: string
-  subjects: SubjectModel[]
+  subjects: SubjectModel[],
 }
 
 type UseAllSubject = {
   subjects: AllSubjectInterface | null;
   getSubjects: () => Promise<void>;
+  clearSub: () => void,
 };
 
 export const useAllSubjects = create<UseAllSubject>((set) => ({
@@ -38,6 +39,9 @@ export const useAllSubjects = create<UseAllSubject>((set) => ({
       console.error("Error getting subjects:", e);
     }
   },
+  clearSub: () => {
+    set({ subjects: null });
+  }
 }));
 
 async function requestAllSubjects({

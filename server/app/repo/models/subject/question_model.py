@@ -27,6 +27,6 @@ class QuestionModel(Base):
         uselist=False      
     )
     
-    __table_args__ = (
-        UniqueConstraint("question", "subject_id", name="_question_subject_uc"),
-    )
+    # __table_args__ = (
+    #     UniqueConstraint("question", "subject_id", name="_question_subject_uc"),
+    # )

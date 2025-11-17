@@ -1,3 +1,4 @@
+import { useAllSubjects } from "../../utils/hooks/use_all_subjects";
 import { useAuthTokenStore } from "../../utils/hooks/use_auth_token_store";
 import { useCurrentUserStore } from "../../utils/hooks/use_current_user";
 import { useIsAuthenticatedStore } from "../../utils/hooks/use_is_authenticated_store";
@@ -23,6 +24,7 @@ export default async function HandleLogout() {
     setUser(null);
 
     setIsAuthenticatedStatus(false);
+    useAllSubjects.getState().clearSub()
     navigate(AppUrl.login)
     clearStudentInfo()
     clear()
