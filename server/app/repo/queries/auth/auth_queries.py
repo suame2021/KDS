@@ -4,7 +4,8 @@ from app.repo.schemas.student_schemas.add_new_student_schemas import AddNewStude
 from app.utils.enums.auth_enums import AuthEums
 from app.security.password_hasher import generate_password, verify_hash_password
 from app.repo.schemas.login_schemas import LoginUserSchemas
-
+from app.repo import db_session_manager
+import openpyxl
 from ...dependecy import AsyncSession
 from sqlalchemy import select
 from ...models import StudentsModel, AdminModel
@@ -56,3 +57,25 @@ class AuthQueries:
                 return user
             return AuthEums.NOT_ALLOWED
         return AuthEums.NOT_FOUND
+
+    async def process_bulk_students(self, file, class_id: str):
+
+        workbook = openpyxl.load_workbook(file.file)  # ✅ correct
+        sheet = workbook.active
+
+        async with db_session_manager.session() as session:
+            repo = AuthQueries(session)
+
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                full_name, identifier = row
+                if not full_name or not identifier:
+                    continue
+
+                password = full_name.split(" ")[0]
+                payload = AddNewStudentSchemas(
+                    full_name=full_name.strip(),
+                    identifier=str(identifier).strip(),
+                    class_id=class_id,
+                    password=password
+                )
+                await repo.add_new_student(payload)

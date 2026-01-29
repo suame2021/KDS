@@ -81,9 +81,6 @@ export default function ExamPreParation() {
             Once you start the exam, you cannot go back.
           </li>
           <li className="list-group-item bg-transparent border-0">
-            Make sure you have a stable internet connection.
-          </li>
-          <li className="list-group-item bg-transparent border-0">
             Do not refresh or close the browser during the exam.
           </li>
           <li className="list-group-item bg-transparent border-0">

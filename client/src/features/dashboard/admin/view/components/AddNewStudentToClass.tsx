@@ -2,6 +2,8 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 import { AllAdminOperation } from "../../viewModel/allAdminOperations";
 import { useViewClassInfoStore } from "../../../../../utils/hooks/use_view_class_info";
+import { uploadStudentsExcel } from "../../viewModel/uploadStudentExcel";
+import { useNotificationStore } from "../../../../../utils/hooks/use_notification_store";
 
 export interface AddNewStudentForm {
     full_name: string;
@@ -67,13 +69,22 @@ export default function AddNewStudentToClass({
         onSave(data);
     };
 
-    const onUpload: SubmitHandler<UploadExcelForm> = (data) => {
+    const onUpload: SubmitHandler<UploadExcelForm> = async (data) => {
         if (data.file && data.file.length > 0) {
-            const file = data.file[0];
-            onUploadExcel(file, classId);
-            resetExcel();
+          const file = data.file[0];
+          try {
+            await uploadStudentsExcel({ file, classId });
+            resetExcel(); // clear form
+            useNotificationStore.getState().showNotification("Excel upload started in background", "success");
+            reset()
+            await getClassInfo(className)
+            onClose()
+          } catch (err) {
+            console.error(err);
+          }
         }
-    };
+      };
+      
 
     return (
         <div

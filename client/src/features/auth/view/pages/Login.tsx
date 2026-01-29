@@ -83,7 +83,7 @@ const Login: React.FC = () => {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Identifier */}
                     <div className="mb-3">
-                        <label htmlFor="identifier" className="form-label">Identifier</label>
+                        <label htmlFor="identifier" className="form-label">Username</label>
                         <input
                             type="text"
                             placeholder="Enter your identifier"

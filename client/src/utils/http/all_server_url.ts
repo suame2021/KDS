@@ -11,6 +11,7 @@ export class AllServerUrls {
     static getRefreshToken: string = `${AllServerUrls.backendUrl}/auth/refresh_token`
     static currentUser: string = `${AllServerUrls.backendUrl}/auth/current_user`
     static logout: string = `${AllServerUrls.backendUrl}/auth/logout`
+    static bulkRegisterStudents: string = `${AllServerUrls.backendUrl}/auth/register/bulk`
 
 
     // all url relating to classess

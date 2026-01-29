@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Response, Depends, Request
+from fastapi import APIRouter, Response, Depends, Request, Query, UploadFile, File, BackgroundTasks
+from uuid import UUID
 from fastapi.responses import JSONResponse
 from app.repo.schemas.default_server_res import DefaultServerApiRes
 from app.repo import db_injection
@@ -147,4 +148,20 @@ async def logout(response: Response):
     return DefaultServerApiRes(
         statusCode=200,
         message="user have successfully logged out"
+    )
+
+
+@auth.post("/register/bulk", response_model=DefaultServerApiRes)
+async def bulk_register_students(
+    db: db_injection,
+    background_tasks: BackgroundTasks,
+    class_id: str = Query(...),
+    file: UploadFile = File(...),
+
+):
+    user =  AuthQueries(db)
+    background_tasks.add_task(user.process_bulk_students, file, class_id)
+    return DefaultServerApiRes(
+        statusCode=202,
+        message="Bulk student registration started in background"
     )
