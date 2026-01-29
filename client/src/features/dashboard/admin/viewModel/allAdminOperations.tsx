@@ -245,4 +245,131 @@ export class AllAdminOperation {
     return res
   }
 
+
+  static async saveQuestionFormat(data: {
+    subjectId: string;
+    num_of_qa: number;
+    score_per_qa: number;
+  }): Promise<boolean> {
+    const { token } = useAuthTokenStore.getState();
+    const { showNotification } = useNotificationStore.getState();
+
+    try {
+      const res = await DefaultRequestSetUp.post<typeof data, boolean>({
+        url: AllServerUrls.saveQuestionFormat, // You'll need to define this URL
+        token: token!,
+        data,
+      });
+
+      if (res.statusCode === 200) {
+        showNotification(
+          res.message || "Question format saved successfully!",
+          "success"
+        );
+        return true;
+      } else {
+        showNotification(
+          res.message || "Failed to save question format",
+          "error"
+        );
+        return false;
+      }
+    } catch (error: any) {
+      console.error("Error saving question format:", error);
+      showNotification(
+        error.message || "Something went wrong while saving format",
+        "error"
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Get question format for a subject
+   */
+  static async getQuestionFormat(subjectId: string): Promise<{
+    num_of_qa: number;
+    score_per_qa: number;
+    created_at?: string;
+  } | null> {
+    const { token } = useAuthTokenStore.getState();
+
+    try {
+      const res = await DefaultRequestSetUp.get<{
+        num_of_qa: number;
+        score_per_qa: number;
+        created_at?: string;
+      }>({
+        url: `${AllServerUrls.getQuestionFormat}/${subjectId}`, // You'll need to define this URL
+        token: token!,
+      });
+
+      if (res.statusCode === 200 && res.data) {
+        return res.data;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching question format:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the count of available questions for a subject
+   */
+  static async getQuestionCount(subjectId: string): Promise<number> {
+    const { token } = useAuthTokenStore.getState();
+
+    try {
+      const res = await DefaultRequestSetUp.get<{ count: number }>({
+        url: `${AllServerUrls.getQuestionCount}/${subjectId}`, // You'll need to define this URL
+        token: token!,
+      });
+
+      if (res.statusCode === 200 && res.data) {
+        return res.data.count || 0;
+      }
+      return 0;
+    } catch (error) {
+      console.error("Error fetching question count:", error);
+      return 0;
+    }
+  }
+
+  /**
+   * Delete question format for a subject
+   */
+  static async deleteQuestionFormat(subjectId: string): Promise<boolean> {
+    const { token } = useAuthTokenStore.getState();
+    const { showNotification } = useNotificationStore.getState();
+
+    try {
+      const res = await DefaultRequestSetUp.delete<void, boolean>({
+        url: `${AllServerUrls.deleteQuestionFormat}/${subjectId}`, // You'll need to define this URL
+        token: token!,
+      });
+
+      if (res.statusCode === 200) {
+        showNotification(
+          res.message || "Question format deleted successfully!",
+          "success"
+        );
+        return true;
+      } else {
+        showNotification(
+          res.message || "Failed to delete question format",
+          "error"
+        );
+        return false;
+      }
+    } catch (error: any) {
+      console.error("Error deleting question format:", error);
+      showNotification(
+        error.message || "Something went wrong while deleting format",
+        "error"
+      );
+      return false;
+    }
+  }
+
 }

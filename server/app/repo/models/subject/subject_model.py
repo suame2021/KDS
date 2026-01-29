@@ -21,16 +21,24 @@ class SubJectModel(Base):
 
     class_: Mapped["ClassModel"] = relationship("ClassModel", back_populates="subjects")
 
-    # One-to-one with QuestionModel
-    question: Mapped["QuestionModel"] = relationship(
+
+    question: Mapped[list["QuestionModel"]] = relationship(
         "QuestionModel",
-        back_populates="subject",      
+        back_populates="subject",
         cascade="all, delete-orphan"
     )
 
     # One-to-one with TimerModel
     timer: Mapped["TimerModel"] = relationship(
         "TimerModel",
+        back_populates="subject",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
+
+    filter_question: Mapped["FilterQuestionModel"] = relationship(
+        "FilterQuestionModel",
         back_populates="subject",
         uselist=False,
         cascade="all, delete-orphan"

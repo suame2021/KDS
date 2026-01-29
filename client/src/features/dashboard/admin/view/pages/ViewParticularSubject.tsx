@@ -5,10 +5,12 @@ import { useNotificationStore } from "../../../../../utils/hooks/use_notificatio
 import { useFullSubjectStore } from "../../../../../utils/hooks/use_subject_full_info";
 import AddTimerPopUp from "../components/AddTimerPopUp";
 import UploadStudentQuestion from "../components/UploadStudentQuestion";
+
 import { usePopupStore } from "../../../../../utils/hooks/use_pop_up_menu";
 import { AllAdminOperation } from "../../viewModel/allAdminOperations";
 import { useGenerateRecordStore } from "../../../../../utils/hooks/use_generate_records";
 import Spinner from "../../../../../common/component/Spinner";
+import FormatQuestionPopup from "../components/formatQuestionPopup";
 
 export default function ViewParticularSubject() {
   const { subjectId, subjectTitle } = useParams<{
@@ -21,9 +23,32 @@ export default function ViewParticularSubject() {
 
   const [showTimerPopup, setShowTimerPopup] = useState(false);
   const [showAddQuestionPopup, setShowAddQuestionPopup] = useState(false);
+  const [showFormatPopup, setShowFormatPopup] = useState(false); // ADD THIS STATE
   const [searchTerm, setSearchTerm] = useState("");
   const { openPopup, closePopup } = usePopupStore.getState()
-  const {sendStudentRecord, generateState} = useGenerateRecordStore()
+  const { sendStudentRecord, generateState } = useGenerateRecordStore()
+  const [questionFormat, setQuestionFormat] = useState<{ // ADD THIS STATE
+    num_of_qa: number;
+    score_per_qa: number;
+  } | null>(null);
+
+  // Fetch question format when subject data loads
+  useEffect(() => {
+    if (subjectId && subjectData?.question) {
+      fetchQuestionFormat();
+    }
+  }, [subjectId, subjectData?.question]);
+
+  const fetchQuestionFormat = async () => {
+    if (!subjectId) return;
+    try {
+      const format = await AllAdminOperation.getQuestionFormat(subjectId);
+      setQuestionFormat(format);
+    } catch (error) {
+      console.error("Error fetching question format:", error);
+      setQuestionFormat(null);
+    }
+  };
 
   useEffect(() => {
     if (subjectId && subjectTitle) {
@@ -52,6 +77,7 @@ export default function ViewParticularSubject() {
   }
 
   const { timer, question, students } = subjectData;
+  const questionCount = question?.totalQuestions || 0; // Assuming your question object has question_count
 
   return (
     <>
@@ -59,162 +85,180 @@ export default function ViewParticularSubject() {
         <div className="container">
           <div className="card border-0 shadow-sm">
             {
-              !generateState ?             <div className="card-body">
-              {/* Header Section */}
-              <div className="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                  <h3 className="mb-1 text-primary">{subjectTitle}</h3>
-                  <p className="text-muted mb-0">
-                    Students: <strong>{students?.length || 0}</strong> • Timer:{" "}
-                    {timer ? (
-                      <span className="badge bg-info text-dark">
-                        {timer.hr.toString().padStart(2, "0")}h{" "}
-                        {timer.mins.toString().padStart(2, "0")}m{" "}
-                        {timer.sec.toString().padStart(2, "0")}s
-                      </span>
-                    ) : (
-                      <span className="badge bg-secondary">Not set</span>
-                    )}
-                    • Questions:{" "}
-                    <strong>{question ? "Added" : "Not added"}</strong>
-                  </p>
-                </div>
+              !generateState ?
+                <div className="card-body">
+                  {/* Header Section */}
+                  <div className="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                      <h3 className="mb-1 text-primary">{subjectTitle}</h3>
+                      <p className="text-muted mb-0">
+                        Students: <strong>{students?.length || 0}</strong> • Timer:{" "}
+                        {timer ? (
+                          <span className="badge bg-info text-dark">
+                            {timer.hr.toString().padStart(2, "0")}h{" "}
+                            {timer.mins.toString().padStart(2, "0")}m{" "}
+                            {timer.sec.toString().padStart(2, "0")}s
+                          </span>
+                        ) : (
+                          <span className="badge bg-secondary">Not set</span>
+                        )}
+                        • Questions:{" "}
+                        <strong>
+                          {question ? `${questionCount} questions` : "Not added"}
+                        </strong>
+                        {questionFormat && (
+                          <> • Format: <span className="badge bg-success">
+                            {questionFormat.num_of_qa}Q × {questionFormat.score_per_qa}pts
+                          </span></>
+                        )}
+                      </p>
+                    </div>
 
-                {/* Buttons Section */}
-                <div className="d-flex flex-column align-items-end">
-                  <button
-                    className="btn btn-outline-primary btn-sm mb-2"
-                    onClick={() => setShowTimerPopup(true)}
-                  >
-                    ⏱{!timer ? " Add Timer" : " Update Timer"}
-                  </button>
-
-                  {!question && (
-                    <button
-                      className="btn btn-primary btn-sm mb-2"
-                      onClick={() => setShowAddQuestionPopup(true)}
-                    >
-                      ➕ Add Questions
-                    </button>
-                  )}
-                  {
-                    students.length !== 0 && (
+                    {/* Buttons Section */}
+                    <div className="d-flex flex-column align-items-end">
                       <button
-                        className="btn btn-outline-success btn-sm mb-2"
-                        onClick={() => {
-                          openPopup({
-                            title: "Generate excel record",
-                            message: "Do you wish to carry out with this operation!!!",
-                            onContinue: async () => { 
-                              await sendStudentRecord(students, subjectTitle!)
-                            },
-                            onCancel: () => closePopup(),
-                          })
-                        }}
+                        className="btn btn-outline-primary btn-sm mb-2"
+                        onClick={() => setShowTimerPopup(true)}
                       >
-                        📄 {"Generate Excel Record"}
+                        ⏱{!timer ? " Add Timer" : " Update Timer"}
                       </button>
-                    )
-                  }
+                      {
+                        question && (
+                          <button
+                            className="btn btn-outline-success btn-sm mb-2"
+                            onClick={() => setShowFormatPopup(true)} // FIXED THIS LINE
+                          >
+                            {questionFormat ? "📝 Update Format" : "📝 Set Format"}
+                          </button>
+                        )
+                      }
 
-                  {
-                    question && (
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => {
-                          openPopup({
-                            title: "Delete uploaded question",
-                            message: "Do you want to delete the current current question!!",
-                            onContinue: async () => { 
-                              var res = await AllAdminOperation.deleteQuestions({subjectId:subjectId!})
-                              if(res){
-                                if(students.length !== 0) await sendStudentRecord(students, subjectTitle!)
-                                await getSubjectFullInfo(subjectId!, subjectTitle!)
-                              }
-                            },
-                            onCancel: () => closePopup(),
-                          })
+                      {!question && (
+                        <button
+                          className="btn btn-primary btn-sm mb-2"
+                          onClick={() => setShowAddQuestionPopup(true)}
+                        >
+                          ➕ Add Questions
+                        </button>
+                      )}
+                      {
+                        students.length !== 0 && (
+                          <button
+                            className="btn btn-outline-success btn-sm mb-2"
+                            onClick={() => {
+                              openPopup({
+                                title: "Generate excel record",
+                                message: "Do you wish to carry out with this operation!!!",
+                                onContinue: async () => {
+                                  await sendStudentRecord(students, subjectTitle!)
+                                },
+                                onCancel: () => closePopup(),
+                              })
+                            }}
+                          >
+                            📄 {"Generate Excel Record"}
+                          </button>
+                        )
+                      }
+
+                      {
+                        question && (
+                          <button
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => {
+                              openPopup({
+                                title: "Delete uploaded question",
+                                message: "Do you want to delete the current current question!!",
+                                onContinue: async () => {
+                                  var res = await AllAdminOperation.deleteQuestions({ subjectId: subjectId! })
+                                  if (res) {
+                                    if (students.length !== 0) await sendStudentRecord(students, subjectTitle!)
+                                    await getSubjectFullInfo(subjectId!, subjectTitle!)
+                                  }
+                                },
+                                onCancel: () => closePopup(),
+                              })
+                            }}
+                          >
+                            ❌ {"Drop Question"}
+                          </button>
+                        )
+                      }
+                    </div>
+                  </div>
+
+                  {/* Search */}
+                  <div className="mb-3 position-relative d-flex align-items-center">
+                    <div className="position-relative" style={{ flexGrow: 1 }}>
+                      <input
+                        type="text"
+                        className="form-control form-control-sm ps-4"
+                        placeholder="Search student by name or ID..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ maxWidth: "300px" }}
+                      />
+                      <Search
+                        size={16}
+                        className="text-secondary position-absolute"
+                        style={{
+                          left: "10px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
                         }}
-                      >
-                        ❌ {"Drop Question"}
-                      </button>
-                    )
-                  }
-                </div>
-              </div>
+                      />
+                    </div>
+                  </div>
 
-              {/* Search */}
-              <div className="mb-3 position-relative d-flex align-items-center">
-                <div className="position-relative" style={{ flexGrow: 1 }}>
-                  <input
-                    type="text"
-                    className="form-control form-control-sm ps-4"
-                    placeholder="Search student by name or ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ maxWidth: "300px" }}
-                  />
-                  <Search
-                    size={16}
-                    className="text-secondary position-absolute"
+                  {/* Student Table */}
+                  <div
+                    className="table-responsive"
                     style={{
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                      scrollbarColor: "rgba(108,117,125,0.6) transparent",
                     }}
-                  />
-                </div>
-              </div>
-
-              {/* Student Table */}
-              <div
-                className="table-responsive"
-                style={{
-                  maxHeight: "400px",
-                  overflowY: "auto",
-                  scrollbarColor: "rgba(108,117,125,0.6) transparent",
-                }}
-              >
-                <table className="table table-hover align-middle">
-                  <thead className="table-light sticky-top">
-                    <tr>
-                      <th>#</th>
-                      <th>Student Name</th>
-                      <th>Identifier</th>
-                      <th>Subject</th>
-                      <th>Score</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStudents.length > 0 ? (
-                      filteredStudents.map((student, index) => (
-                        <tr key={`${student.identifier}-${index}`}>
-                          <td>{index + 1}</td>
-                          <td>{student.studentName}</td>
-                          <td>
-                            <span className="badge bg-secondary">
-                              {student.identifier}
-                            </span>
-                          </td>
-                          <td>{subjectTitle}</td>
-                          <td>
-                            {student.score !== undefined
-                              ? `${student.score}/${student.total}`
-                              : "—"}
-                          </td>
+                  >
+                    <table className="table table-hover align-middle">
+                      <thead className="table-light sticky-top">
+                        <tr>
+                          <th>#</th>
+                          <th>Student Name</th>
+                          <th>Identifier</th>
+                          <th>Subject</th>
+                          <th>Score</th>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className="text-center text-muted py-4">
-                          No matching students found 😕
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>: <Spinner message="generating excel file"/> 
+                      </thead>
+                      <tbody>
+                        {filteredStudents.length > 0 ? (
+                          filteredStudents.map((student, index) => (
+                            <tr key={`${student.identifier}-${index}`}>
+                              <td>{index + 1}</td>
+                              <td>{student.studentName}</td>
+                              <td>
+                                <span className="badge bg-secondary">
+                                  {student.identifier}
+                                </span>
+                              </td>
+                              <td>{subjectTitle}</td>
+                              <td>
+                                {student.score !== undefined
+                                  ? `${student.score}/${student.total}`
+                                  : "—"}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={5} className="text-center text-muted py-4">
+                              No matching students found 😕
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div> : <Spinner message="generating excel file" />
             }
           </div>
         </div>
@@ -247,6 +291,20 @@ export default function ViewParticularSubject() {
               showNotification("Failed to load subject info", "error")
             )
           }
+        />
+      )}
+
+      {/* Format Question Popup */}
+      {showFormatPopup && (
+        <FormatQuestionPopup
+          subjectId={subjectId!}
+          subjectTitle={subjectTitle!}
+          existingFormat={questionFormat}
+          onClose={() => setShowFormatPopup(false)}
+          onSave={async () => {
+            await fetchQuestionFormat();
+            await getSubjectFullInfo(subjectId!, subjectTitle!);
+          }}
         />
       )}
     </>
